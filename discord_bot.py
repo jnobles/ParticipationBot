@@ -36,8 +36,7 @@ async def select_google_sheet(ctx, workbook_name, sheet_name=None):
 # takes input in the form of 'name [optional value]\n' for any number of lines
 @bot.command(name='participation', help='Logs participation')
 @commands.has_role('Mysterium')
-async def log_participation(ctx):
-    args = str(ctx.message.content).splitlines()[1:]
+async def log_participation(ctx, *, args):
     parsed_input = parse_participation(args)
     message = ''
     for line in parsed_input:
@@ -45,8 +44,10 @@ async def log_participation(ctx):
     await ctx.send(message)
 
 
-# parses input into a list of the form [[member, points]], if no point value is indicated, defaults to 1 point
+# parses input into a list of lists in the form [[member, leads, events]], if no point value is indicated,
+# defaults to 1 point
 def parse_participation(args):
+    args = args.splitlines()
     parsed = []
     for line in args:
         temp = ['name', 1]
@@ -56,7 +57,27 @@ def parse_participation(args):
         else:
             temp[0] = ''.join(line)
         parsed.append(temp)
+    print(parsed)
     return parsed
+
+
+def add_participation(playername, leads=0, events=0):
+    playerfound = False
+    row = 1
+    for row in range(1, len(sheetData)+1):
+        if sheetData[row-1][0] == playername:
+            playerfound = True
+            active_sheet.update_cell(row, 3, int(sheetData[row-1][2]) + leads)
+            active_sheet.update_cell(row, 4, int(sheetData[row-1][3]) + events)
+            break
+
+    if playerfound:
+        message = f'{playername} gained {leads} point(s) for leading and {events} point(s) for participating.'
+    else:
+        message = f'{playername} not found.  Failed to add {leads} point(s) for leading and {events} ' \
+                  f'point(s) for participating.'
+
+    return message
 
 
 # advises of lacking role on command usage check
