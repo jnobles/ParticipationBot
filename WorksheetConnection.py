@@ -29,7 +29,7 @@ class WorksheetConnection:
             print(f'Authentication failed: {e}')
             raise AuthenticationFailed
         else:
-            print('Authenticated successfully.')
+            print('Authenticated with Google successfully.')
 
     def open_sheet(self, workbook, sheet):
         self.file_name = workbook
