@@ -30,54 +30,64 @@ async def select_google_sheet(ctx, workbook_name, sheet_name=None):
     else:
         global active_sheet
         active_sheet = active_file.open_sheet(workbook_name, sheet_name)
+        print(f'{active_sheet.file_name} is open for editing.')
 
 
 # parses and logs participation, can only be invoked by Mysterium members
 # takes input in the form of 'name [optional value]\n' for any number of lines
 @bot.command(name='participation', help='Logs participation')
-@commands.has_role('Mysterium')
 async def log_participation(ctx, *, args):
-    parsed_input = parse_participation(args)
+    if len(args) == 0 or "\n" not in args:
+        await ctx.send(
+            "Press Shift+Enter to enter multiple lines in one message.\n"
+            "Your command should be in the form of:\n"
+            "!participation\n"
+            "Player Name [leader] [participation points]\n"
+            "with each new player on a new line.  If the player lead the event, type \"leader\" after their name.  "
+            "You may manually specify the number of participation points granted.  If no number is specified, 1 point "
+            "is given.")
+    parsed_input = event_participation(args)
     message = ''
     for line in parsed_input:
-        message += f'{line[0]} gains {line[1]} point(s)\n'
+        print(f"Name: {parsed_input[0]}, Leader: {parsed_input[1]}, Participation Points: {parsed_input[2]}")
     await ctx.send(message)
 
 
-# parses input into a list of lists in the form [[member, leads, events]], if no point value is indicated,
-# defaults to 1 point
-def parse_participation(args):
+# todo: bonus points (player and points)
+# todo: poobadoo participation (player and points)
+def poobadoo_points(args):
     args = args.splitlines()
     parsed = []
     for line in args:
         temp = ['name', 1]
-        if line.split()[-1].isnumeric():
-            temp[1] = line.split()[-1]
-            temp[0] = ''.join(line.split()[:-1])
-        else:
-            temp[0] = ''.join(line)
+        input_string = args.split()
+        temp[1] = input_string[-1]
+        temp[0] = input_string[:-1]
         parsed.append(temp)
-    print(parsed)
+
+
+# todo: event participation (leader and players)
+def event_participation(args):
+    args = args.splitlines()
+    parsed = []
+    for line in args:
+        temp = ['name', False, 1]
+        input_string = line.split()
+        if len(input_string) == 1:
+            temp[0] = ''.join(input_string)
+            break
+        if 'leader' in input_string.tolower():
+            # todo: this check will not work correctly if someone has a name containing a space and any part of their
+            #   name that isn't the first word contains the word 'leader'
+            temp[1] = True
+        if input_string[-1].isnumeric():
+            temp[2] = input_string[-1]
+        temp[0] = ''.join(input_string[:-1])
+        parsed.append(temp)
     return parsed
 
 
-def add_participation(playername, leads=0, events=0):
-    playerfound = False
-    row = 1
-    for row in range(1, len(sheetData)+1):
-        if sheetData[row-1][0] == playername:
-            playerfound = True
-            active_sheet.update_cell(row, 3, int(sheetData[row-1][2]) + leads)
-            active_sheet.update_cell(row, 4, int(sheetData[row-1][3]) + events)
-            break
-
-    if playerfound:
-        message = f'{playername} gained {leads} point(s) for leading and {events} point(s) for participating.'
-    else:
-        message = f'{playername} not found.  Failed to add {leads} point(s) for leading and {events} ' \
-                  f'point(s) for participating.'
-
-    return message
+# todo: rewrite call to WorksheetConnection.py for writing to sheet; parsing of bot commands has changed
 
 
 # advises of lacking role on command usage check
