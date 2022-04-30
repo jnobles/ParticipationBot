@@ -14,8 +14,7 @@ class ParticipationCog(commands.Cog):
         self.bot = bot
 
     @commands.command(name='set_sheet',
-                      help='Selects a Google Sheet as the target for commands.\n'
-                           'Input: !set_sheet WorkbookName [SheetName]:optional')
+                      help='Selects a Google Sheet as the target for commands.')
     async def select_google_sheet(self, ctx, workbook_name, sheet_name=None):
         try:
             global active_file
@@ -27,18 +26,19 @@ class ParticipationCog(commands.Cog):
             active_sheet = active_file.open_sheet(workbook_name, sheet_name)
             print(f'{active_sheet.file_name} is open for editing.')
 
-    # todo: bonus points (player and points)
-    @commands.command(name='bonus_points',
-                      help='Awards bonus points.\n'
-                           'Input: !bonus points PlayerName Points')
-    def bonus_points(self, ctx, *, args: str):
-        # todo: write parsing function
-        pass
+    @commands.group(invoke_without_command=True)
+    async def log(self, ctx):
+        await ctx.send('Valid options are "bonus", "poobadoo"')
 
-    @commands.command(name='poobadoo_points',
-                      help='Awards poobadoo points.\n'
-                           'Input: !poobadoo_points PlayerName [Points]:optional')
-    def poobadoo_points(self, ctx, *, args: str):
+    @log.command(name='bonus_points',
+                 help='Awards bonus points.')
+    async def bonus(self, ctx, *, args: str):
+        # todo: write parsing function
+        await ctx.send(f'{args}')
+
+    @log.command(name='poobadoo',
+                 help='Awards poobadoo points.')
+    async def poobadoo_points(self, ctx, *, args: str):
         args = args.splitlines()
         parsed = []
         for line in args:
@@ -48,10 +48,9 @@ class ParticipationCog(commands.Cog):
             temp[0] = input_string[:-1]
             parsed.append(temp)
 
-    @commands.command(name='event_participation',
-                      help='Awards event participation.\n'
-                           'Input: !event_participation PlayerName [Leader]:optional [Points]:optional')
-    def event_participation(self, ctx, *, args: str):
+    @log.command(name='event',
+                 help='Awards event participation.')
+    async def event_participation(self, ctx, *, args: str):
         args = args.splitlines()
         parsed = []
         for line in args:
