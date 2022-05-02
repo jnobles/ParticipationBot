@@ -16,8 +16,15 @@ class BotManagementCog(commands.Cog):
                  hidden=True)
     async def list(self, ctx):
         cog_list = '```\n'
-        for file in [f for f in os.listdir('./cogs') if f.endswith('.py')]:
-            cog_list += f'{file[:-3]}\n'
+        for file in [file for file in os.listdir('./cogs') if file.endswith('.py')]:
+            cog_list += f'{file[:-3]}: '
+            try:
+                self.bot.load_extension(f'cogs.{file[:-3]}')
+            except commands.ExtensionAlreadyLoaded:
+                cog_list += 'Loaded\n'
+            else:
+                self.bot.unload_extension(f'cogs.{file[:-3]}')
+                cog_list += 'Unloaded'
         cog_list += '```'
         await ctx.send(cog_list)
 
