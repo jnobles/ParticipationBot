@@ -17,16 +17,7 @@ async def on_ready():
     print('Connected to Discord.')
 
 
+bot.load_extension('cogs.BotManagement')
 bot.load_extension('cogs.Participation')
-
-
-# advises of lacking role on command usage check
-# raises any other error to the console
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send('You do not have the correct role for this command.')
-    else:
-        raise
 
 bot.run(TOKEN)
