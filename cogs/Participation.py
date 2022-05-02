@@ -14,7 +14,7 @@ class ParticipationCog(commands.Cog):
         self.bot = bot
 
     @commands.command(name='set_sheet',
-                      help='Selects a Google Sheet as the target for commands.')
+                      description='Selects a Google Sheet as the target for commands.')
     async def select_google_sheet(self, ctx, workbook_name, sheet_name=None):
         try:
             global active_file
@@ -30,14 +30,14 @@ class ParticipationCog(commands.Cog):
     async def log(self, ctx):
         await ctx.send('Valid options are "bonus", "poobadoo"')
 
-    @log.command(name='bonus_points',
-                 help='Awards bonus points.')
+    @log.command(name='bonus',
+                 description='Awards bonus points.')
     async def bonus(self, ctx, *, args: str):
         # todo: write parsing function
         await ctx.send(f'{args}')
 
     @log.command(name='poobadoo',
-                 help='Awards poobadoo points.')
+                 description='Awards poobadoo points.')
     async def poobadoo_points(self, ctx, *, args: str):
         args = args.splitlines()
         parsed = []
@@ -49,7 +49,7 @@ class ParticipationCog(commands.Cog):
             parsed.append(temp)
 
     @log.command(name='event',
-                 help='Awards event participation.')
+                 description='Awards event participation.')
     async def event_participation(self, ctx, *, args: str):
         args = args.splitlines()
         parsed = []
