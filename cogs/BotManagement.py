@@ -61,6 +61,20 @@ class BotManagementCog(commands.Cog):
         else:
             await ctx.send(f'Cog \'{cog_name}\' has been reloaded.')
 
+    @cog.command(name='reload_all',
+                 description='Reloads all currently loaded cogs.',
+                 hidden=True)
+    async def reload_all(self, ctx):
+        reloaded_cogs_list = 'Reloaded the following cogs:\n```\n'
+        for file in [file for file in os.listdir('./cogs') if file.endswith('.py')]:
+            try:
+                self.bot.load_extension(f'cogs.{file[:-3]}')
+            except commands.ExtensionAlreadyLoaded:
+                self.bot.reload_extension(f'cogs.{file[:-3]}')
+                reloaded_cogs_list += f'{file[:-3]}\n'
+        reloaded_cogs_list += '```'
+        await ctx.send(reloaded_cogs_list)
+
 
 def setup(bot):
     bot.add_cog(BotManagementCog(bot))
