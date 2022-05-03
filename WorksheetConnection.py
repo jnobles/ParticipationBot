@@ -12,7 +12,6 @@ class AuthenticationFailed(WorksheetConnectionException):
 
 class WorksheetConnection:
     def __init__(self, credential_file_path):
-        self.file_name = self.sheet_name = None
         self.active_file = self.active_sheet = None
 
         scopes = [
@@ -27,21 +26,29 @@ class WorksheetConnection:
             self.gc = gspread.authorize(credentials)
         except AuthenticationFailed as e:
             print(f'Authentication failed: {e}')
-            raise AuthenticationFailed
         else:
             print('Authenticated with Google successfully.')
 
-    def open_sheet(self, workbook, sheet):
-        self.file_name = workbook
-        self.sheet_name = sheet
-
-        self.active_file = self.gc.open(workbook)
+    def open_sheet(self, file, sheet=None):
+        message = ''
         try:
-            self.active_sheet = self.active_file.worksheet(sheet)
-        except TypeError:
-            self.active_sheet = self.active_file.sheet1
-
-        print(f'{self.file_name} is open for editing.')
+            self.active_file = self.gc.open(file)
+        except gspread.exceptions.SpreadsheetNotFound:
+            message = f'{file} not found.'
+        else:
+            if sheet is None:
+                self.active_sheet = self.active_file.sheet1
+                message = f'{self.active_file.title} > {self.active_sheet.title} ' \
+                          f'successfully opened for editing.'
+            else:
+                try:
+                    self.active_sheet = self.active_file.worksheet(sheet)
+                except gspread.exceptions.WorksheetNotFound:
+                    message = f'{sheet} not found in {self.active_file.title}'
+                else:
+                    message = f'{self.active_file.title} > {self.active_sheet.title} ' \
+                              f'successfully opened for editing.'
+        return message
 
     def get_cell_value(self, row, column):
         return self.active_sheet.cell(row, column).value
