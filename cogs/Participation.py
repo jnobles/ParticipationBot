@@ -28,7 +28,15 @@ class ParticipationCog(commands.Cog):
 
     @commands.group(invoke_without_command=True)
     async def log(self, ctx):
-        await ctx.send('Valid options are "bonus", "poobadoo"')
+        message = 'Available subcommands are:\n```'
+        for command in commands.Cog.walk_commands(self):
+            try:
+                if command.parent.name == 'log':
+                    message += f'{command.parent.name} {command.name}: {command.description}\n'
+            except AttributeError:
+                continue
+        message += '```'
+        await ctx.send(message)
 
     @log.command(name='bonus',
                  description='Awards bonus points.')
