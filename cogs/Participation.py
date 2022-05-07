@@ -46,18 +46,30 @@ class ParticipationCog(commands.Cog):
         for line in args:
             temp = ['name', 1]
             input_string = line.split()
-            temp[1] = input_string[-1]
-            temp[0] = ''.join(input_string[:-1])
+            if len(input_string) == 1:
+                temp[0] = ''.join(input_string)
+                parsed.append(temp)
+                continue
+            if input_string[-1].isnumeric():
+                temp[0] = ' '.join(input_string[:-1])
+                temp[1] = int(input_string[-1])
+            else:
+                temp[0] = ' '.join(input_string)
             parsed.append(temp)
 
-        message = ''
-        try:
-            # todo: attempt to write to spreadsheet
-            message = 'Successfully added:\n```\n'
-            message += ''.join([f'{item[0]} gains {item[1]} bonus point(s).\n' for item in parsed])
-            message += '```'
-        except Exception as e:
-            message = f'Error parsing: {e}'
+        global file
+        message = '```\n'
+        # todo: more magic numbers
+        for player in parsed:
+            try:
+                player_row = file.get_player_row_index(player[0])
+                previous_points = file.get_cell_value(player_row, 13)
+                new_points = int(previous_points) + player[1] if previous_points is not None else player[1]
+                file.update_cell_value(player_row, 13, new_points)
+                message += f'{player[0]} gains {player[1]} bonus point(s).\n'
+            except WSConnection.PlayerNotFound:
+                message += f'**{player[0]} not found, {player[1]} point(s) not logged**'
+        message += '```'
         await ctx.send(message)
 
     @log.command(name='poobadoo',
