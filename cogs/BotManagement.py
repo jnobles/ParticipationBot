@@ -19,11 +19,11 @@ class BotManagementCog(commands.Cog):
         for file in [file for file in os.listdir('./cogs') if file.endswith('.py')]:
             cog_list += f'{file[:-3]}: '
             try:
-                self.bot.load_extension(f'cogs.{file[:-3]}')
+                await self.bot.load_extension(f'cogs.{file[:-3]}')
             except commands.ExtensionAlreadyLoaded:
                 cog_list += 'Loaded\n'
             else:
-                self.bot.unload_extension(f'cogs.{file[:-3]}')
+                await self.bot.unload_extension(f'cogs.{file[:-3]}')
                 cog_list += 'Unloaded'
         cog_list += '```'
         await ctx.send(cog_list)
@@ -33,7 +33,7 @@ class BotManagementCog(commands.Cog):
                  hidden=True)
     async def load(self, ctx, cog_name):
         try:
-            self.bot.load_extension(f'cogs.{cog_name}')
+            await self.bot.load_extension(f'cogs.{cog_name}')
         except commands.ExtensionError as e:
             await ctx.send(f'There was a problem loading \'{cog_name}\'.\nNote: Cog names are case sensitive.')
         else:
@@ -44,7 +44,7 @@ class BotManagementCog(commands.Cog):
                  hidden=True)
     async def unload(self, ctx, cog_name):
         try:
-            self.bot.unload_extension(f'cogs.{cog_name}')
+            await self.bot.unload_extension(f'cogs.{cog_name}')
         except commands.ExtensionError as e:
             await ctx.send(f'There was a problem unloading \'{cog_name}\'.\nNote: Cog names are case sensitive.')
         else:
@@ -55,7 +55,7 @@ class BotManagementCog(commands.Cog):
                  hidden=True)
     async def reload(self, ctx, cog_name):
         try:
-            self.bot.reload_extension(f'cogs.{cog_name}')
+            await self.bot.reload_extension(f'cogs.{cog_name}')
         except commands.ExtensionError as e:
             await ctx.send(f'There was a problem reloading \'{cog_name}\'.\nNote: Cog names are case sensitive.')
         else:
@@ -68,13 +68,13 @@ class BotManagementCog(commands.Cog):
         reloaded_cogs_list = 'Reloaded the following cogs:\n```\n'
         for file in [file for file in os.listdir('./cogs') if file.endswith('.py')]:
             try:
-                self.bot.load_extension(f'cogs.{file[:-3]}')
+                await self.bot.load_extension(f'cogs.{file[:-3]}')
             except commands.ExtensionAlreadyLoaded:
-                self.bot.reload_extension(f'cogs.{file[:-3]}')
+                await self.bot.reload_extension(f'cogs.{file[:-3]}')
                 reloaded_cogs_list += f'{file[:-3]}\n'
         reloaded_cogs_list += '```'
         await ctx.send(reloaded_cogs_list)
 
 
-def setup(bot):
-    bot.add_cog(BotManagementCog(bot))
+async def setup(bot):
+    await bot.add_cog(BotManagementCog(bot))

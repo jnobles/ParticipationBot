@@ -39,22 +39,22 @@ class WorksheetConnection:
             if sheet is None:
                 self.active_sheet = self.active_file.sheet1
                 self.active_sheet_name = self.active_sheet.title
-                self.sheet_values = np.array(self.active_sheet.get_all_values())
+                self.pull_sheet_values()
                 message = f'{self.active_file_name} > {self.active_sheet_name} ' \
                           f'successfully opened for editing.'
             else:
                 try:
                     self.active_sheet = self.active_file.worksheet(sheet)
                     self.active_sheet_name = self.active_sheet.title
-                    self.sheet_values = np.array(self.active_sheet.get_all_values())
+                    self.pull_sheet_values()
                     message = f'{self.active_file_name} > {self.active_sheet_name} ' \
                               f'successfully opened for editing.'
                 except gspread.exceptions.WorksheetNotFound:
                     message = f'{sheet} not found in {self.active_file_name}'
         return message
 
-    def push_sheet_changes(self):
-        self.active_sheet.update(self.sheet_values)
+    def pull_sheet_values(self):
+        self.sheet_values = np.array(self.active_sheet.get_all_values())
 
     def get_cell_value(self, row, column):
         return self.active_sheet.cell(row, column).value

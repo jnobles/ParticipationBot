@@ -40,7 +40,7 @@ class ParticipationCog(commands.Cog):
 
     @log.command(name='bonus',
                  description='Awards bonus points.')
-    async def bonus(self, ctx, *, args):
+    async def bonus_points(self, ctx, *, args):
         args = args.splitlines()
         parsed = []
         for line in args:
@@ -58,6 +58,7 @@ class ParticipationCog(commands.Cog):
             parsed.append(temp)
 
         global file
+        file.pull_sheet_values()
         message = '```\n'
         # todo: more magic numbers
         for player in parsed:
@@ -68,7 +69,7 @@ class ParticipationCog(commands.Cog):
                 file.update_cell_value(player_row, 13, new_points)
                 message += f'{player[0]} gains {player[1]} bonus point(s).\n'
             except WSConnection.PlayerNotFound:
-                message += f'**{player[0]} not found, {player[1]} point(s) not logged**'
+                message += f'**{player[0]} not found, {player[1]} point(s) not logged.**'
         message += '```'
         await ctx.send(message)
 
@@ -80,23 +81,36 @@ class ParticipationCog(commands.Cog):
         for line in args:
             temp = ['name', 1]
             input_string = line.split()
-            temp[1] = input_string[-1]
-            temp[0] = ''.join(input_string[:-1])
+            if len(input_string) == 1:
+                temp[0] = ''.join(input_string)
+                parsed.append(temp)
+                continue
+            if input_string[-1].isnumeric():
+                temp[0] = ' '.join(input_string[:-1])
+                temp[1] = int(input_string[-1])
+            else:
+                temp[0] = ' '.join(input_string)
             parsed.append(temp)
 
-        message = ''
-        try:
-            # todo: attempt to write to spreadsheet
-            message = '```\n'
-            message += ''.join([f'{item[0]} gains {item[1]} poobadoo point(s).\n' for item in parsed])
-            message += '```'
-        except Exception as e:
-            message = f'Error parsing: {e}'
+        global file
+        file.pull_sheet_values()
+        message = '```\n'
+        # todo: magic numbers
+        for player in parsed:
+            try:
+                player_row = file.get_player_row_index(player[0])
+                previous_points = file.get_cell_value(player_row, 11)
+                new_points = int(previous_points) + player[1] if previous_points is not None else player[1]
+                file.update_cell_value(player_row, 11, new_points)
+                message += f'{player[0]} gains {player[1]} poobadoo point(s).\n'
+            except WSConnection.PlayerNotFound:
+                message += f'**{player[0]} not found, {player[1]} point(s) not logged.**'
+        message += '```'
         await ctx.send(message)
 
     @log.command(name='event',
                  description='Awards event participation.')
-    async def event_participation(self, ctx, *, args):
+    async def event_points(self, ctx, *, args):
         args = args.splitlines()
         parsed = []
         for line in args:
@@ -113,16 +127,25 @@ class ParticipationCog(commands.Cog):
             temp[0] = ''.join(input_string[:-1])
             parsed.append(temp)
 
+        global file
+        file.pull_sheet_values()
         message = '```\n'
-        try:
-            for item in parsed:
-                # todo: attempt to write to spreadsheet
-                message += ''.join(f'{item[0]}{"(Leader)" if item[1] else ""} gains {item[2]} event point(s).\n')
-            message += '```'
-        except Exception as e:
-            message = f'Error parsing: {e}'
+        for player in parsed:
+            try:
+                player_row = file.get_player_row_index(player[0])
+                previous_points = file.get_cell_value(player_row, 11)
+                new_points = int(previous_points) + player[2] if previous_points is not None else player[2]
+                file.update_cell_value(player_row, 11, new_points)
+                if player[1]: # if leader == True
+                    previous_points = file.get_cell_value(player_row, 6)
+                    new_points = int(previous_points) + 1 if previous_points is not None else 1
+                    file.update_cell_value(player_row, 6, new_points)
+                message += f'{player[0]} gains {player[1]} poobadoo point(s).\n'
+            except WSConnection.PlayerNotFound:
+                message += f'**{player[0]} not found, {player[2]} point(s) (Leader = {player[1]}) not logged.'
+        message += '```'
         await ctx.send(message)
 
 
-def setup(bot):
-    bot.add_cog(ParticipationCog(bot))
+async def setup(bot):
+    await bot.add_cog(ParticipationCog(bot))
