@@ -19,11 +19,11 @@ class BotManagementCog(commands.Cog):
         for file in [file for file in os.listdir('./cogs') if file.endswith('.py')]:
             cog_list += f'{file[:-3]}: '
             try:
-                await self.bot.load_extension(f'cogs.{file[:-3]}')
-            except commands.ExtensionAlreadyLoaded:
+                self.bot.load_extension(f'cogs.{file[:-3]}')
+            except discord.ExtensionAlreadyLoaded:
                 cog_list += 'Loaded\n'
             else:
-                await self.bot.unload_extension(f'cogs.{file[:-3]}')
+                self.bot.unload_extension(f'cogs.{file[:-3]}')
                 cog_list += 'Unloaded'
         cog_list += '```'
         await ctx.send(cog_list)
@@ -33,8 +33,8 @@ class BotManagementCog(commands.Cog):
                  hidden=True)
     async def load(self, ctx, cog_name):
         try:
-            await self.bot.load_extension(f'cogs.{cog_name}')
-        except commands.ExtensionError as e:
+            self.bot.load_extension(f'cogs.{cog_name}')
+        except discord.ExtensionAlreadyLoaded as e:
             await ctx.send(f'There was a problem loading \'{cog_name}\'.\nNote: Cog names are case sensitive.')
         else:
             await ctx.send(f'Cog \'{cog_name}\' has been loaded.')
@@ -44,8 +44,8 @@ class BotManagementCog(commands.Cog):
                  hidden=True)
     async def unload(self, ctx, cog_name):
         try:
-            await self.bot.unload_extension(f'cogs.{cog_name}')
-        except commands.ExtensionError as e:
+            self.bot.unload_extension(f'cogs.{cog_name}')
+        except discord.ExtensionError:
             await ctx.send(f'There was a problem unloading \'{cog_name}\'.\nNote: Cog names are case sensitive.')
         else:
             await ctx.send(f'Cog \'{cog_name}\' has been unloaded.')
@@ -55,8 +55,8 @@ class BotManagementCog(commands.Cog):
                  hidden=True)
     async def reload(self, ctx, cog_name):
         try:
-            await self.bot.reload_extension(f'cogs.{cog_name}')
-        except commands.ExtensionError as e:
+            self.bot.reload_extension(f'cogs.{cog_name}')
+        except discord.ExtensionNotFound as e:
             await ctx.send(f'There was a problem reloading \'{cog_name}\'.\nNote: Cog names are case sensitive.')
         else:
             await ctx.send(f'Cog \'{cog_name}\' has been reloaded.')
@@ -68,13 +68,13 @@ class BotManagementCog(commands.Cog):
         reloaded_cogs_list = 'Reloaded the following cogs:\n```\n'
         for file in [file for file in os.listdir('./cogs') if file.endswith('.py')]:
             try:
-                await self.bot.load_extension(f'cogs.{file[:-3]}')
-            except commands.ExtensionAlreadyLoaded:
-                await self.bot.reload_extension(f'cogs.{file[:-3]}')
+                self.bot.load_extension(f'cogs.{file[:-3]}')
+            except discord.ExtensionAlreadyLoaded:
+                self.bot.reload_extension(f'cogs.{file[:-3]}')
                 reloaded_cogs_list += f'{file[:-3]}\n'
         reloaded_cogs_list += '```'
         await ctx.send(reloaded_cogs_list)
 
 
-async def setup(bot):
-    await bot.add_cog(BotManagementCog(bot))
+def setup(bot):
+    bot.add_cog(BotManagementCog(bot))
