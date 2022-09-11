@@ -10,7 +10,7 @@ load_dotenv()
 # initialize bot to respond to '!' commands
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(intents=intents)
 
 
 # prints connection confirmation to console
@@ -22,5 +22,6 @@ async def on_ready():
 
 bot.load_extension('cogs.BotManagement')
 bot.load_extension('cogs.Participation')
+bot.load_extension('cogs.Test')
 
 bot.run(os.getenv('DISCORD_TOKEN'))

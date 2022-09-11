@@ -3,15 +3,15 @@ from discord.ext import commands
 import os
 
 
-class BotManagementCog(commands.Cog):
+class BotManagementCog(discord.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=False)
-    async def cog(self, ctx):
-        pass
+    @commands.group(invoke_without_command=True)
+    async def mgmt(self, ctx):
+        await ctx.send('Subcommand not found')
 
-    @cog.command(name='list',
+    @mgmt.command(name='list',
                  description='Lists available cogs and their load status',
                  hidden=True)
     async def list(self, ctx):
@@ -28,7 +28,7 @@ class BotManagementCog(commands.Cog):
         cog_list += '```'
         await ctx.send(cog_list)
 
-    @cog.command(name='load',
+    @mgmt.command(name='load',
                  description='Loads specified cog',
                  hidden=True)
     async def load(self, ctx, cog_name):
@@ -39,7 +39,7 @@ class BotManagementCog(commands.Cog):
         else:
             await ctx.send(f'Cog \'{cog_name}\' has been loaded.')
 
-    @cog.command(name='unload',
+    @mgmt.command(name='unload',
                  description='Unloads specified cog',
                  hidden=True)
     async def unload(self, ctx, cog_name):
@@ -50,7 +50,7 @@ class BotManagementCog(commands.Cog):
         else:
             await ctx.send(f'Cog \'{cog_name}\' has been unloaded.')
 
-    @cog.command(name='reload',
+    @mgmt.command(name='reload',
                  description='Reloads specified cog',
                  hidden=True)
     async def reload(self, ctx, cog_name):
@@ -61,7 +61,7 @@ class BotManagementCog(commands.Cog):
         else:
             await ctx.send(f'Cog \'{cog_name}\' has been reloaded.')
 
-    @cog.command(name='reload_all',
+    @mgmt.command(name='reload_all',
                  description='Reloads all currently loaded cogs.',
                  hidden=True)
     async def reload_all(self, ctx):

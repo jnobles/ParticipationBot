@@ -10,7 +10,7 @@ GSHEET_CRED = os.getenv('GOOGLE_SHEET_CREDENTIAL_FILE_PATH')
 file = None
 
 
-class ParticipationCog(commands.Cog):
+class ParticipationCog(discord.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -147,5 +147,5 @@ class ParticipationCog(commands.Cog):
         await ctx.send(message)
 
 
-async def setup(bot):
-    await bot.add_cog(ParticipationCog(bot))
+def setup(bot):
+    bot.add_cog(ParticipationCog(bot))
